@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  font-family: 'Saira', sans-serif;
 }
 
 .container {
@@ -12,7 +12,7 @@ body {
 	width: 80%;
 	float: left;
     height: 100vh;
-    padding: 10px;
+    padding: 0;
     box-sizing: border-box;
     box-shadow: 2px 2px 13px 1px;
 }
@@ -29,6 +29,6 @@ svg {
 	height: 100vh;
 }
 
-svg rect, svg circle, svg path {
+svg rect, svg circle, svg path, svg text {
 	cursor: pointer;
 }

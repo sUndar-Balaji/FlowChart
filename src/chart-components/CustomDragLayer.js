@@ -39,7 +39,7 @@ class CustomDragLayer extends Component {
         break;
       case 'End':
         return (
-          <End forDisplayOnly={true} />
+          <End x={50} y={40} forDisplayOnly={true} />
         );
         break;
       default:

@@ -28,9 +28,13 @@ class FlowChartContainer extends Component {
     return (
       <div className="container">
         <div className="elementsContainer">
+          <div>
+            Flowchart Components
+          </div>
+          <br/>
           <svg width='200px' height='300px'>
             <Condition forDisplayOnly={true} />
-            <End forDisplayOnly={true} />
+            <End x={50} y={85} forDisplayOnly={true} />
           </svg>
           <CustomDragLayer />
         </div>
