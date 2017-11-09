@@ -54,17 +54,22 @@ function publish(component, dropLocation) {
 class DrawingBoard extends Component {
   constructor() {
     super();
+    window.drawingBoardContext = this;
     this.state = {
       rectStyle: {/*
         width: '100px',
         height: '50px',*/
+        position: 'relative',
       },
       currentComponentOffset: {
         x: 0, 
         y: 0,
       },
       chartComponents: [],
-    }
+      editComponent: false,
+      currentEditingComponent: null,
+      dataInTreeStructure: [],
+    };
     this.observe = observe(this.addDroppedComponent.bind(this));
     window.removeComponent = this.removeComponent.bind(this);
     window.addConnectorLines = this.addConnectorLines;
@@ -86,9 +91,19 @@ class DrawingBoard extends Component {
   addDroppedComponent(component, dropLocation) {
     if (window.createNewCopies !== true) {
       let componentAlreadyExist = false;
-      let updatedComponent = this.state.chartComponents.map(function (component) {
+      let updatedComponent = this.state.chartComponents.map((component) => {
         if (component.id === window.recentlyDraggedComponentID) {
           componentAlreadyExist = true;
+          let updatedData = this.state.dataInTreeStructure.map((dataNode) => {
+            if (dataNode.id === window.recentlyDraggedComponentID) {
+              let newNode = { ...dataNode, ...dropLocation, statement: component.statement || 'statement' };
+              return newNode;
+            }
+
+            return dataNode;
+          });
+
+          this.setState({dataInTreeStructure: updatedData});
           return { ...component, ...dropLocation };
         }
 
@@ -101,7 +116,18 @@ class DrawingBoard extends Component {
         this.setState({chartComponents: [...this.state.chartComponents, { component, ...dropLocation, id: ++componentCounter }]});
       }
     } else {
-        this.setState({chartComponents: [...this.state.chartComponents, { component, ...dropLocation, id: ++componentCounter }]});
+      this.setState({
+        dataInTreeStructure: [
+          ...this.state.dataInTreeStructure,
+          {
+            ...dropLocation,
+            id: componentCounter + 1,
+            statement: 'statement', 
+            childrens: [], 
+          },
+        ]
+      });
+      this.setState({chartComponents: [...this.state.chartComponents, { component, ...dropLocation, id: ++componentCounter }]});
     }
   }
 
@@ -113,6 +139,14 @@ class DrawingBoard extends Component {
           component: ComponentConnector, 
           coordinates, 
           id: ++componentCounter,
+        }
+      ],
+      dataInTreeStructure: [
+        ...this.state.dataInTreeStructure,
+        {
+          component: 'ComponentConnector',
+          coordinates,
+          id: componentCounter,
         }
       ]
     });
@@ -144,6 +178,47 @@ class DrawingBoard extends Component {
     }
   }
 
+  updateComponentName = (id) => {
+    this.componentNameEditBox.value = '';
+    this.setState({editComponent: true, currentEditingComponent: id});
+  }
+
+  updateDone = (e) => {
+    if (e.type === 'click' || e.which === 13) {
+      let updatedComponentsDetails = this.state.chartComponents.map((componentDetails) => {
+        if (componentDetails.id === this.state.currentEditingComponent) {
+          this.setState({currentEditingComponent: null, editComponent: false});
+          return { ...componentDetails, statement: this.componentNameEditBox.value };
+        }
+
+        return componentDetails;
+      });
+
+      this.setState({chartComponents: updatedComponentsDetails});
+    }
+  }
+
+  updateTheData(data, parentComponentId) {
+    if (parentComponentId) {
+      this.state.dataInTreeStructure.map((dataNode) => {
+        if (dataNode.id === parentComponentId) {
+          let newNode = { ...dataNode, childrens: [...dataNode.childrens].push(data) };
+          return newNode;
+        }
+
+        return dataNode;
+      });
+    } else {
+      this.setState({
+        dataInTreeStructure: {
+          id: 1,
+          childrens: [],
+          data: data, 
+        }
+      })
+    }
+  }
+
   removeComponent = (e) => {
     if (e.which === 46) {
       let updatedComponents;
@@ -165,6 +240,10 @@ class DrawingBoard extends Component {
 
     return connectDropTarget(
       <div style={this.state.rectStyle} className='drawing-board' onClick={this.removeComponent}>
+        <div style={{position: 'absolute'}} className={this.state.editComponent ? 'display-block overlay' : 'display-none overlay'}>
+          <input type='text' ref={(node) => { this.componentNameEditBox = node; }} onKeyPress={this.updateDone} />
+          <input type='button' value='x' onClick={this.updateDone} />
+        </div>
         <svg>
           {
             this.state.chartComponents.map((componentDetails, index) => {
@@ -179,12 +258,15 @@ class DrawingBoard extends Component {
                 }
 
                 return <NewComp 
+                        parent={this}
                         forDisplayOnly={false} 
                         x={componentDetails.x - this.state.currentComponentOffset.x} 
                         y={componentDetails.y} 
                         id={componentDetails.id} 
                         key={index}
-                        updateComponentDragPosition={this.updateComponentDragPosition} />
+                        updateComponentDragPosition={this.updateComponentDragPosition}
+                        updateComponentName={this.updateComponentName}
+                        value={componentDetails.statement} />
               } else {
                 return <Component 
                           key={index} 

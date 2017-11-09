@@ -56,6 +56,12 @@ class End extends Component {
     }
   }
 
+  editComponentName = () => {    
+    if (this.props.updateComponentName) {
+      this.props.updateComponentName(this.props.id);
+    }
+  }
+
   componentDidMount() {
     const { connectDragSource, x, y, didDrop, id, isDragging, updateComponentDragPosition, forDisplayOnly } = this.props;
 
@@ -71,9 +77,9 @@ class End extends Component {
     }
 
     return connectDragSource(
-      <g onClick={this.markPosition}>
-        <ellipse cx={x} cy={y} rx="50" ry="25"/>
-        <text x={x - 35} y={y + 5} fill='#fff'>Statement</text>
+      <g>
+        <ellipse cx={x} cy={y} rx="50" ry="25" onClick={this.markPosition}/>
+        <text x={x - 35} y={y + 5} fill='#fff' onClick={this.editComponentName}>{this.props.value || 'statement'}</text>
       </g>
     );
   }

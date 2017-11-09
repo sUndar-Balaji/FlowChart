@@ -50,7 +50,13 @@ class Condition extends Component {
       e.persist();
       window.componentConnector = window.componentConnector || [];
       if (window.componentConnector.length === 0) {
-        window.componentConnector.push({x: (selectedComponent.x + selectedComponent.width / 2), y: (selectedComponent.y + selectedComponent.height), id: this.props.id});
+        window.componentConnector.push({
+          x: (selectedComponent.x + selectedComponent.width / 2), 
+          y: (selectedComponent.y + selectedComponent.height), 
+          id: this.props.id, 
+          componentName: this.constructor.name,
+          componentValue: this.props.value,
+        });
       } else {
         window.componentConnector.push({x: (selectedComponent.x + selectedComponent.width / 2), y: selectedComponent.y, id: this.props.id});
       }
@@ -63,6 +69,12 @@ class Condition extends Component {
 
     if (this.props.id !== undefined) {
       window.recentlyDraggedComponentID = this.props.id;
+    }
+  }
+
+  editComponentName = () => {    
+    if (this.props.updateComponentName) {
+      this.props.updateComponentName(this.props.id);
     }
   }
 
@@ -80,9 +92,20 @@ class Condition extends Component {
     }
 
     return connectDragSource(
-      <g onClick={this.markPosition}>
-        <rect x={x} y={y} style={this.state.rectStyle}></rect>
-        <text x={x ? x + 15: 15} y={y ? y + 30 : 30} fill='#fff'>Statement</text>
+      <g>
+        <rect 
+          x={x} 
+          y={y} 
+          style={this.state.rectStyle} 
+          onClick={this.markPosition}>
+        </rect>
+        <text 
+          x={x ? x + 15: 15} 
+          y={y ? y + 30 : 30} 
+          fill='#fff'
+          onClick={this.editComponentName}>
+          {this.props.value || 'statement'}
+        </text>
       </g>
     );
   }
