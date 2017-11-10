@@ -144,7 +144,7 @@ class DrawingBoard extends Component {
       dataInTreeStructure: [
         ...this.state.dataInTreeStructure,
         {
-          component: 'ComponentConnector',
+          component: ComponentConnector,
           coordinates,
           id: componentCounter,
         }
@@ -194,7 +194,19 @@ class DrawingBoard extends Component {
         return componentDetails;
       });
 
-      this.setState({chartComponents: updatedComponentsDetails});
+      let updatedData = this.state.dataInTreeStructure.map((dataNode) => {
+        if (dataNode.id === this.state.currentEditingComponent) {
+          let newNode = { ...dataNode, statement: this.componentNameEditBox.value };
+          return newNode;
+        }
+
+        return dataNode;
+      });
+
+      this.setState({
+        chartComponents: updatedComponentsDetails,
+        dataInTreeStructure: updatedData,
+      });
     }
   }
 
@@ -234,15 +246,31 @@ class DrawingBoard extends Component {
       window.componentConnector = [];
     }
   }
+
+  rerenderUsingFormedData = () => {
+    this.setState({chartComponents: []});
+    this.setState({chartComponents: [...this.state.dataInTreeStructure]});
+  }
   
   render() {
     const { connectDropTarget, isOver, canDrop, draggedItem } = this.props;
 
     return connectDropTarget(
       <div style={this.state.rectStyle} className='drawing-board' onClick={this.removeComponent}>
-        <div style={{position: 'absolute'}} className={this.state.editComponent ? 'display-block overlay' : 'display-none overlay'}>
-          <input type='text' ref={(node) => { this.componentNameEditBox = node; }} onKeyPress={this.updateDone} />
-          <input type='button' value='x' onClick={this.updateDone} />
+        <div style={{position: 'relative'}}>
+          <input 
+            type='button' 
+            className='save-btn'
+            value='save' 
+            onClick={this.rerenderUsingFormedData} 
+            style={{position: 'absolute'}} />
+        </div>
+        <div style={{position: 'fixed', height: '100%', width: '100%'}} className={this.state.editComponent ? 'display-block' : 'display-none'}>
+          <div style={{width: '100%', height: '100%', position: 'absolute'}} className='overlay' />
+          <div style={{position: 'absolute'}}>
+            <input type='text' ref={(node) => { this.componentNameEditBox = node; }} onKeyPress={this.updateDone} />
+            <input type='button' value='x' onClick={this.updateDone} />
+          </div>
         </div>
         <svg>
           {
@@ -258,15 +286,15 @@ class DrawingBoard extends Component {
                 }
 
                 return <NewComp 
-                        parent={this}
-                        forDisplayOnly={false} 
-                        x={componentDetails.x - this.state.currentComponentOffset.x} 
-                        y={componentDetails.y} 
-                        id={componentDetails.id} 
-                        key={index}
-                        updateComponentDragPosition={this.updateComponentDragPosition}
-                        updateComponentName={this.updateComponentName}
-                        value={componentDetails.statement} />
+                          parent={this}
+                          forDisplayOnly={false} 
+                          x={componentDetails.x - this.state.currentComponentOffset.x} 
+                          y={componentDetails.y} 
+                          id={componentDetails.id}
+                          key={index}
+                          updateComponentDragPosition={this.updateComponentDragPosition}
+                          updateComponentName={this.updateComponentName}
+                          value={componentDetails.statement} />
               } else {
                 return <Component 
                           key={index} 

@@ -35,7 +35,7 @@ class Condition extends Component {
       rectStyle: {
         width: '100px',
         height: '50px',
-        backgroundColor: '#999', 
+        fill: '#00796b', 
       },
       x: 0,
       y: 0,

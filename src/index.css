@@ -1,4 +1,4 @@
-body {
+* {
   margin: 0;
   padding: 0;
   font-family: 'Saira', sans-serif;
@@ -48,4 +48,15 @@ svg {
 
 svg rect, svg circle, svg path, svg text {
 	cursor: pointer;
+}
+
+.save-btn {
+	position: absolute;
+    padding: 7px 35px;
+    color: #fff;
+    border: 0;
+    box-shadow: 0 0 4px 1px rgb(0, 121, 107);
+    background: #2979ff;
+    cursor: pointer;
+    font-size: 18px;
 }

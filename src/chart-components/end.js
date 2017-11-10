@@ -31,6 +31,11 @@ export function collect(connect, monitor) {
 class End extends Component {
   constructor() {
     super();
+    this.state = {
+      style: {
+        fill: '#f50057',
+      }
+    }
   }
 
   markPosition = (e) => {
@@ -78,7 +83,7 @@ class End extends Component {
 
     return connectDragSource(
       <g>
-        <ellipse cx={x} cy={y} rx="50" ry="25" onClick={this.markPosition}/>
+        <ellipse style={this.state.style} cx={x} cy={y} rx="50" ry="25" onClick={this.markPosition}/>
         <text x={x - 35} y={y + 5} fill='#fff' onClick={this.editComponentName}>{this.props.value || 'statement'}</text>
       </g>
     );
