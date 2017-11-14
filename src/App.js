@@ -7,6 +7,38 @@ import DrawingBoard from './chart-components/DrawingBoard';
 import CustomDragLayer from './chart-components/CustomDragLayer';
 import './App.css';
 
+var flowchartData = [{
+  childrens: [],
+  componentName: 'Condition',
+  id: 1,
+  statement: 'statement',
+  x: 542,
+  y: 115,
+}, {
+  childrens: [],
+  componentName: 'Condition',
+  id: 2,
+  statement: 'new label',
+  x: 334,
+  y: 280,
+}, {
+  componentName: 'Connector',
+  coordinates: [{
+    x: 592,
+    y: 165,
+    id: 1,
+    componentName: 'Condition',
+    componentValue: 'statement',
+    position: 'left',
+  }, {
+    id: 2,
+    x: 384,
+    y: 280,
+    position: 'top',
+  }],
+  id: 3,
+}];
+
 class FlowChartContainer extends Component {
   constructor() {
     super();
@@ -20,7 +52,8 @@ class FlowChartContainer extends Component {
         transform: 'translate(10px, 10px)',
         WebkitTransform: 'translate(10px, 10px)',
         height: '800',
-      }
+      },
+      flowchartData
     }
   }
 
@@ -38,7 +71,7 @@ class FlowChartContainer extends Component {
           </svg>
           <CustomDragLayer />
         </div>
-        <DrawingBoard />
+        <DrawingBoard flowchartData={this.state.flowchartData} />
       </div>
     );
   }

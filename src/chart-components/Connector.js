@@ -8,7 +8,7 @@ class ComponentConnector extends Component {
 	render() {
 		const [initialPoint, endPoint] = this.props.coordinates;
 
-		return (
+		return ( 
 			<line 
 				x1={initialPoint.x - this.props.startingPoint.x} 
 				y1={initialPoint.y - this.props.startingPoint.y} 
@@ -16,7 +16,7 @@ class ComponentConnector extends Component {
 				y2={endPoint.y - this.props.startingPoint.y} 
 				strokeWidth='2px' 
 				stroke='black' 
-				/>
+				markerEnd='url(#head)' />
 		);
 	}
 }

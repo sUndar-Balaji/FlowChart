@@ -55,6 +55,7 @@ class DrawingBoard extends Component {
   constructor() {
     super();
     window.drawingBoardContext = this;
+    console.log(this.props);
     this.state = {
       rectStyle: {/*
         width: '100px',
@@ -69,6 +70,7 @@ class DrawingBoard extends Component {
       editComponent: false,
       currentEditingComponent: null,
       dataInTreeStructure: [],
+      componentDropped: false,
     };
     this.observe = observe(this.addDroppedComponent.bind(this));
     window.removeComponent = this.removeComponent.bind(this);
@@ -80,8 +82,11 @@ class DrawingBoard extends Component {
       currentComponentOffset: { 
         x: ReactDom.findDOMNode(this).getBoundingClientRect().x,
         y: ReactDom.findDOMNode(this).getBoundingClientRect().y, 
-      }
+      },
+      chartComponents: this.props.flowchartData,
+      dataInTreeStructure: this.props.flowchartData,
     });
+    componentCounter = this.props.flowchartData[this.props.flowchartData.length - 1].id;
   }
 
   componentWillUnmount() {
@@ -89,6 +94,8 @@ class DrawingBoard extends Component {
   }
 
   addDroppedComponent(component, dropLocation) {
+    this.setState({componentDropped: true});
+    this.componentDropped = true;
     if (window.createNewCopies !== true) {
       let componentAlreadyExist = false;
       let updatedComponent = this.state.chartComponents.map((component) => {
@@ -136,7 +143,7 @@ class DrawingBoard extends Component {
       chartComponents: [
         ...this.state.chartComponents, 
         { 
-          component: ComponentConnector, 
+          componentName: 'Connector', 
           coordinates, 
           id: ++componentCounter,
         }
@@ -144,7 +151,7 @@ class DrawingBoard extends Component {
       dataInTreeStructure: [
         ...this.state.dataInTreeStructure,
         {
-          component: ComponentConnector,
+          componentName: 'Connector',
           coordinates,
           id: componentCounter,
         }
@@ -154,27 +161,39 @@ class DrawingBoard extends Component {
 
   updateComponentDragPosition = (id, latestCoordinates) => {
     let updateComponent = false;
-    let chartComponents = this.state.chartComponents.map(function (component) {
-      if ('coordinates' in component) {
-        let foundParent = { ...component };
-        foundParent.coordinates.forEach(function (componentCoordinate) {
-          if (componentCoordinate.id === id) {
-            if (componentCoordinate.x !== latestCoordinates.x && componentCoordinate.y !== latestCoordinates.y) {
-              componentCoordinate.x = latestCoordinates.x + (latestCoordinates.width / 2);
-              componentCoordinate.y = latestCoordinates.y;
-              updateComponent = true;
+    console.log(this.refs, id, this.refs[id], Object.keys(this.refs).length);
+    if (this.componentDropped === true) {
+      console.log(this.state.componentDropped);
+      let chartComponents = this.state.chartComponents.map((component) => {
+        if ('coordinates' in component) {
+          let foundParent = { ...component };
+          let coordinates = foundParent.coordinates.map((componentCoordinate) => {
+            let coordinate = { ...componentCoordinate };
+            if (coordinate.id === id) {
+              if (this.state.draggedComponentId === id/* && coordinate.x !== latestCoordinates.x && coordinate.y !== latestCoordinates.y*/) {
+                coordinate.x = latestCoordinates.x;
+                coordinate.y = (latestCoordinates.y + latestCoordinates.height / 2);
+                updateComponent = true;
+                coordinate.rendered = true;
+              }
             }
-          }
-        });
 
-        return foundParent;
+            return coordinate;
+          });
+
+          foundParent.coordinates = coordinates;
+          return foundParent;
+        }
+
+        return component;
+      });
+
+      if (updateComponent) {
+        this.setState({chartComponents, componentDropped: false});
+        console.log(this.state.componentDropped);
+        this.componentDropped = false;
+        updateComponent = false;
       }
-
-      return component;
-    });
-
-    if (updateComponent) {
-      this.setState({chartComponents});
     }
   }
 
@@ -231,6 +250,10 @@ class DrawingBoard extends Component {
     }
   }
 
+  updateDraggedComponentId = (id) => {
+    this.setState({draggedComponentId: id});
+  }
+
   removeComponent = (e) => {
     if (e.which === 46) {
       let updatedComponents;
@@ -273,12 +296,18 @@ class DrawingBoard extends Component {
           </div>
         </div>
         <svg>
+          <defs>
+            <marker id='head' orient='auto' markerWidth='2' markerHeight='4'
+                    refX='0.1' refY='2'>
+              <path d='M0,0 V4 L2,2 Z' fill='blue' />
+            </marker>
+          </defs>
           {
             this.state.chartComponents.map((componentDetails, index) => {
               let Component = componentDetails.component,
-                componentName = componentDetails.componentName;
+                componentName = componentDetails.componentName,
+                NewComp;
               if (componentName === 'Condition' || componentName === 'End') {
-                let NewComp;
                 if (componentName === 'Condition') {
                   NewComp = DragSource('Condition', cardSource, collectCondition)(Condition);
                 } else if (componentName === 'End') {
@@ -286,21 +315,27 @@ class DrawingBoard extends Component {
                 }
 
                 return <NewComp 
+                          updateDraggedComponentId={this.updateDraggedComponentId}
+                          ref={componentDetails.id}
                           parent={this}
                           forDisplayOnly={false} 
                           x={componentDetails.x - this.state.currentComponentOffset.x} 
-                          y={componentDetails.y} 
+                          y={componentDetails.y - this.state.currentComponentOffset.y} 
                           id={componentDetails.id}
                           key={index}
                           updateComponentDragPosition={this.updateComponentDragPosition}
                           updateComponentName={this.updateComponentName}
                           value={componentDetails.statement} />
               } else {
-                return <Component 
+                if (componentName === 'Connector') {
+                  NewComp = ComponentConnector;
+                }
+
+                return <NewComp 
                           key={index} 
                           coordinates={componentDetails.coordinates} 
                           startingPoint={this.state.currentComponentOffset} 
-                          id={componentDetails.id} />
+                          id={componentDetails.id}  />
               }
             })
           }
