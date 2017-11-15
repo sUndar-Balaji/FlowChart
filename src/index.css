@@ -60,3 +60,7 @@ svg rect, svg circle, svg path, svg text {
     cursor: pointer;
     font-size: 18px;
 }
+
+.display-none {
+	display: none;
+}

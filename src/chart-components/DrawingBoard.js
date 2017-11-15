@@ -55,7 +55,6 @@ class DrawingBoard extends Component {
   constructor() {
     super();
     window.drawingBoardContext = this;
-    console.log(this.props);
     this.state = {
       rectStyle: {/*
         width: '100px',
@@ -161,9 +160,7 @@ class DrawingBoard extends Component {
 
   updateComponentDragPosition = (id, latestCoordinates) => {
     let updateComponent = false;
-    console.log(this.refs, id, this.refs[id], Object.keys(this.refs).length);
     if (this.componentDropped === true) {
-      console.log(this.state.componentDropped);
       let chartComponents = this.state.chartComponents.map((component) => {
         if ('coordinates' in component) {
           let foundParent = { ...component };
@@ -171,8 +168,20 @@ class DrawingBoard extends Component {
             let coordinate = { ...componentCoordinate };
             if (coordinate.id === id) {
               if (this.state.draggedComponentId === id/* && coordinate.x !== latestCoordinates.x && coordinate.y !== latestCoordinates.y*/) {
-                coordinate.x = latestCoordinates.x;
-                coordinate.y = (latestCoordinates.y + latestCoordinates.height / 2);
+                if (coordinate.position === 'left') {
+                  coordinate.x = latestCoordinates.x;
+                  coordinate.y = (latestCoordinates.y + latestCoordinates.height / 2);
+                } else if (coordinate.position === 'top') {
+                  coordinate.x = latestCoordinates.x + latestCoordinates.width / 2;
+                  coordinate.y = latestCoordinates.y;
+                } else if (coordinate.position === 'right') {
+                  coordinate.x = latestCoordinates.x + latestCoordinates.width;
+                  coordinate.y = latestCoordinates.y + latestCoordinates.height / 2;
+                } else {
+                  coordinate.x = latestCoordinates.x + latestCoordinates.width / 2;
+                  coordinate.y = latestCoordinates.y + latestCoordinates.height;
+                }
+
                 updateComponent = true;
                 coordinate.rendered = true;
               }
@@ -188,9 +197,45 @@ class DrawingBoard extends Component {
         return component;
       });
 
+      let treeStructuredComponentData = this.state.dataInTreeStructure.map((component) => {
+        if ('coordinates' in component) {
+          let foundParent = { ...component };
+          let coordinates = foundParent.coordinates.map((componentCoordinate) => {
+            let coordinate = { ...componentCoordinate };
+            if (coordinate.id === id) {
+              if (this.state.draggedComponentId === id/* && coordinate.x !== latestCoordinates.x && coordinate.y !== latestCoordinates.y*/) {
+                if (coordinate.position === 'left') {
+                  coordinate.x = latestCoordinates.x;
+                  coordinate.y = (latestCoordinates.y + latestCoordinates.height / 2);
+                } else if (coordinate.position === 'top') {
+                  coordinate.x = latestCoordinates.x + latestCoordinates.width / 2;
+                  coordinate.y = latestCoordinates.y;
+                } else if (coordinate.position === 'right') {
+                  coordinate.x = latestCoordinates.x + latestCoordinates.width;
+                  coordinate.y = latestCoordinates.y + latestCoordinates.height / 2;
+                } else {
+                  coordinate.x = latestCoordinates.x + latestCoordinates.width / 2;
+                  coordinate.y = latestCoordinates.y + latestCoordinates.height;
+                }
+              }
+            }
+
+            return coordinate;
+          });
+
+          foundParent.coordinates = coordinates;
+          return foundParent;
+        }
+
+        return component;
+      });
+
       if (updateComponent) {
-        this.setState({chartComponents, componentDropped: false});
-        console.log(this.state.componentDropped);
+        this.setState({
+          chartComponents, 
+          componentDropped: false,
+          dataInTreeStructure: treeStructuredComponentData,
+        });
         this.componentDropped = false;
         updateComponent = false;
       }

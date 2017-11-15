@@ -10,7 +10,7 @@ export const cardSource = {
       window.createNewCopies = false;
     }
 
-    if (props.updateComponentDragPosition) {
+    if (props.updateDraggedComponentId) {
       props.updateDraggedComponentId(props.id);
     }
     window.recentlyDraggedComponentID = props.id;
@@ -81,42 +81,49 @@ class Condition extends Component {
       e.persist();
       window.componentConnector = window.componentConnector || [];
 
+      let connectingPoint;
       if (position === 'left') {
-        window.componentConnector.push({
+        connectingPoint = {
           x: selectedComponent.x, 
           y: (selectedComponent.y + selectedComponent.height / 2), 
           id: this.props.id, 
           componentName: this.constructor.name,
           componentValue: this.props.value,
           position,
-        });
+        };
       } else if (position === 'top') {
-        window.componentConnector.push({
+        connectingPoint = {
           x: selectedComponent.x + selectedComponent.width / 2, 
           y: selectedComponent.y, 
           id: this.props.id, 
           componentName: this.constructor.name,
           componentValue: this.props.value,
           position,
-        });
+        };
       } else if (position === 'right') {
-        window.componentConnector.push({
+        connectingPoint = {
           x: selectedComponent.x + selectedComponent.width, 
           y: selectedComponent.y + selectedComponent.height / 2, 
           id: this.props.id, 
           componentName: this.constructor.name,
           componentValue: this.props.value,
           position,
-        });
+        };
       } else {
-        window.componentConnector.push({
-          x: selectedComponent.x + selectedComponent.width, 
+        connectingPoint = {
+          x: selectedComponent.x + selectedComponent.width / 2, 
           y: selectedComponent.y + selectedComponent.height, 
           id: this.props.id, 
           componentName: this.constructor.name,
           componentValue: this.props.value,
           position,
-        });
+        };
+      }
+
+      if (window.componentConnector.length === 1 && window.componentConnector[0].id === this.props.id) {
+        window.componentConnector[0] = connectingPoint;
+      } else {
+        window.componentConnector.push(connectingPoint);
       }
 
       if (window.componentConnector.length === 2) {
@@ -128,6 +135,10 @@ class Condition extends Component {
     if (this.props.id !== undefined) {
       window.recentlyDraggedComponentID = this.props.id;
     }
+  }
+
+  setSelectedComponent = () => {
+    window.selectedComponent = this.props.id;
   }
 
   editComponentName = () => {    
@@ -174,6 +185,10 @@ class Condition extends Component {
       //updateComponentDragPosition(id, ReactDom.findDOMNode(this).getBoundingClientRect());
     }
   }
+
+  toggleMarkers = (action) => {
+    this.setState({displayMarkers: action === 'display' && this.props.forDisplayOnly === false ? true : false});
+  }
   
   render() {
     const { connectDragSource, x, y, didDrop, id, isDragging, updateComponentDragPosition, forDisplayOnly } = this.props;
@@ -182,49 +197,52 @@ class Condition extends Component {
     }
 
     return connectDragSource(
-      <g>
+      <g
+        onMouseOver={this.toggleMarkers.bind(this, 'display')}
+        onMouseOut={this.toggleMarkers.bind(this, 'hide')}>
         <rect 
           x={x} 
           y={y} 
-          style={this.state.rectStyle} 
-          onClick={this.markPosition}>
+          style={this.state.rectStyle}
+          onClick={this.setSelectedComponent}>
         </rect>
-        <rect 
-          width='5px'
-          height='5px'
-          fill='red'
-          display={this.state.markers.left.display}
-          x={this.state.markers.left.x}
-          y={this.state.markers.left.y}
-          onClick={this.markPosition.bind(this, 'left')}
-          />
-        <rect 
-          width='5px'
-          height='5px'
-          fill='red'
-          display={this.state.markers.top.display}
-          x={this.state.markers.top.x}
-          y={this.state.markers.top.y}
-          onClick={this.markPosition.bind(this, 'top')}
-          />
-        <rect 
-          width='5px'
-          height='5px'
-          fill='red'
-          display={this.state.markers.right.display}
-          x={this.state.markers.right.x}
-          y={this.state.markers.right.y}
-          onClick={this.markPosition.bind(this, 'right')}
-          />
-        <rect 
-          width='5px'
-          height='5px'
-          fill='red'
-          display={this.state.markers.bottom.display}
-          x={this.state.markers.bottom.x}
-          y={this.state.markers.bottom.y}
-          onClick={this.markPosition.bind(this, 'bottom')}
-          />
+        <g className={this.state.displayMarkers ? 'marker display-block' : 'marker display-none'}>
+          <rect 
+            width='5px'
+            height='5px'
+            fill='red'
+            x={this.state.markers.left.x}
+            y={this.state.markers.left.y}
+            onClick={this.markPosition.bind(this, 'left')}
+            />
+          <rect 
+            width='5px'
+            height='5px'
+            fill='red'
+            display={this.state.markers.top.display}
+            x={this.state.markers.top.x}
+            y={this.state.markers.top.y}
+            onClick={this.markPosition.bind(this, 'top')}
+            />
+          <rect 
+            width='5px'
+            height='5px'
+            fill='red'
+            display={this.state.markers.right.display}
+            x={this.state.markers.right.x}
+            y={this.state.markers.right.y}
+            onClick={this.markPosition.bind(this, 'right')}
+            />
+          <rect 
+            width='5px'
+            height='5px'
+            fill='red'
+            display={this.state.markers.bottom.display}
+            x={this.state.markers.bottom.x}
+            y={this.state.markers.bottom.y}
+            onClick={this.markPosition.bind(this, 'bottom')}
+            />
+        </g>
         <text 
           x={x ? x + 15: 15} 
           y={y ? y + 30 : 30} 

@@ -5,6 +5,10 @@ class ComponentConnector extends Component {
 		super();
 	}
 
+	setSelectedComponent = () => {
+    window.selectedComponent = this.props.id;    
+  }
+
 	render() {
 		const [initialPoint, endPoint] = this.props.coordinates;
 
@@ -14,9 +18,10 @@ class ComponentConnector extends Component {
 				y1={initialPoint.y - this.props.startingPoint.y} 
 				x2={endPoint.x - this.props.startingPoint.x} 
 				y2={endPoint.y - this.props.startingPoint.y} 
-				strokeWidth='2px' 
+				strokeWidth='3px' 
 				stroke='black' 
-				markerEnd='url(#head)' />
+				markerEnd='url(#head)'
+				onClick={this.setSelectedComponent} />
 		);
 	}
 }
