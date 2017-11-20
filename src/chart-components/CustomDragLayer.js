@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { DragLayer } from 'react-dnd';
 import Condition from './condition';
 import End from './end';
+import ConditionBlock from './condition-block';
 
 const layerStyles = {
   position: 'fixed',
@@ -43,7 +44,7 @@ class CustomDragLayer extends Component {
         );
         break;
       default:
-        return null;
+        return <ConditionBlock y={80} forDisplayOnly={true} />;
     }
   }
 

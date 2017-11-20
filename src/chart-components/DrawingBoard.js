@@ -3,6 +3,7 @@ import ReactDom from 'react-dom';
 import { DropTarget, DragSource } from 'react-dnd';
 import Condition, { cardSource, collect as collectCondition } from './condition';
 import End, { cardSource as endCardSource, collect as endCardCollect } from './end';
+import ConditionBlock, { cardSource as conditionBlockSource, collect as conditionBlockCollect } from './condition-block';
 import ComponentConnector from './Connector';
 
 let newComp = null;
@@ -352,11 +353,13 @@ class DrawingBoard extends Component {
               let Component = componentDetails.component,
                 componentName = componentDetails.componentName,
                 NewComp;
-              if (componentName === 'Condition' || componentName === 'End') {
+              if (componentName === 'Condition' || componentName === 'End' || componentName === 'ConditionBlock') {
                 if (componentName === 'Condition') {
                   NewComp = DragSource('Condition', cardSource, collectCondition)(Condition);
                 } else if (componentName === 'End') {
                   NewComp = DragSource('End', endCardSource, endCardCollect)(End);
+                } else {
+                  NewComp = DragSource('ConditionBlock', conditionBlockSource, conditionBlockCollect)(ConditionBlock);
                 }
 
                 return <NewComp 
@@ -390,4 +393,4 @@ class DrawingBoard extends Component {
   }
 }
 
-export default DropTarget(['Condition', 'End'], squareTarget, collect)(DrawingBoard);
+export default DropTarget(['Condition', 'End', 'ConditionBlock'], squareTarget, collect)(DrawingBoard);

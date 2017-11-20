@@ -15,7 +15,7 @@ export const cardSource = {
     }
     window.recentlyDraggedComponentID = props.id;
     return {
-      Condition: DragSource('Condition', cardSource, collect)(Condition),
+      ConditionBlock: DragSource('ConditionBlock', cardSource, collect)(ConditionBlock),
     };
   },
 
@@ -37,7 +37,7 @@ export function collect(connect, monitor) {
   };
 }
 
-class Condition extends Component {
+class ConditionBlock extends Component {
   constructor() {
     super();
     this.state = {
@@ -157,21 +157,21 @@ class Condition extends Component {
     this.setState({
       markers: {
         left: {
-          x: this.props.x || 0,
+          x: (this.props.x || 0) + selectedComponent.width / 2,
           y: (this.props.y || 0) + selectedComponent.height / 2,
           display: 'block',
         },
         top: {
-          x: (this.props.x || 0) + selectedComponent.width / 2,
-          y: this.props.y || 0,
+          x: (this.props.x || 0) + selectedComponent.width,
+          y: (this.props.y || 0),
           display: 'block',
         },
         right: {
-          x: (this.props.x || 0) + selectedComponent.width - 5,
+          x: (this.props.x || 0) + (3 / 2 * (selectedComponent.width)) - 5,
           y: (this.props.y || 0) + selectedComponent.height / 2,
         }, 
         bottom: {
-          x: (this.props.x || 0) + selectedComponent.width / 2,
+          x: (this.props.x || 0) + selectedComponent.width,
           y: (this.props.y || 0) + selectedComponent.height - 5,
         }
       }
@@ -191,7 +191,11 @@ class Condition extends Component {
   }
   
   render() {
-    const { connectDragSource, x, y, didDrop, id, isDragging, updateComponentDragPosition, forDisplayOnly } = this.props;
+    let { connectDragSource, x, y, didDrop, id, isDragging, updateComponentDragPosition, forDisplayOnly } = this.props;
+    if (forDisplayOnly === false) {
+      x += 50;
+      y += 50;
+    }
     if (didDrop && id !== undefined) {
       window.recentlyDraggedComponentID = id;      
     }
@@ -200,12 +204,7 @@ class Condition extends Component {
       <g
         onMouseOver={this.toggleMarkers.bind(this, 'display')}
         onMouseOut={this.toggleMarkers.bind(this, 'hide')}>
-        <rect 
-          x={x} 
-          y={y} 
-          style={this.state.rectStyle}
-          onClick={this.setSelectedComponent}>
-        </rect>
+        <path d={`M ${x || 0} ${y} l 50 -50 l 50 50 l -50 50 Z`} strokeWidth='2px' stroke='#000' />
         <g className={this.state.displayMarkers ? 'marker display-block' : 'marker display-none'}>
           <rect 
             width='5px'
@@ -244,20 +243,17 @@ class Condition extends Component {
             />
         </g>
         <text 
-          x={x ? x + 15: 15} 
-          y={y ? y + 30 : 30} 
+          x={x ? x + 13: 13} 
+          y={y} 
           fill='#fff'
-          onClick={this.editComponentName}
-          title={this.props.value || 'statement'}>
-          {
-            this.props.value || 'statement'
-          }
+          onClick={this.editComponentName}>
+          {this.props.value || 'statement'}
         </text>
       </g>
     );
   }
 }
 
-let newConditionComponent = DragSource('Condition', cardSource, collect)(Condition)
+let newConditionComponent = DragSource('ConditionBlock', cardSource, collect)(ConditionBlock);
 
 export default newConditionComponent;

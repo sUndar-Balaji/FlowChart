@@ -3,6 +3,7 @@ import MouseBackend from 'react-dnd-mouse-backend';
 import { DragDropContext, DragSource } from 'react-dnd';
 import Condition from './chart-components/condition';
 import End from './chart-components/end';
+import ConditionBlock from './chart-components/condition-block';
 import DrawingBoard from './chart-components/DrawingBoard';
 import CustomDragLayer from './chart-components/CustomDragLayer';
 import './App.css';
@@ -68,6 +69,7 @@ class FlowChartContainer extends Component {
           <svg width='200px' height='300px'>
             <Condition forDisplayOnly={true} />
             <End x={50} y={85} forDisplayOnly={true} />
+            <ConditionBlock y={175} forDisplayOnly={true} />
           </svg>
           <CustomDragLayer />
         </div>
